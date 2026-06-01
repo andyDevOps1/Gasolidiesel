@@ -1,43 +1,108 @@
 <div class="inicio-page">
-  <!-- Imagen de fondo de pantalla -->
-  <img src="/fondo_body.jpg" class="bg_img" />
+  <img src="/fondo_body.jpg" class="bg_img" alt="Fondo" />
 
   <div class="big_card">
-    <!-- Header -->
     <h1>Localizador de gasolineras cercanas</h1>
 
-    <!-- Dirección y número de gasolineras -->
     <div class="row">
       <div class="localizador">
-        <p>Dirección</p>
+        <p>Tipo de servicio</p>
 
-        <!-- ngModel para enlazar el input con la variable 'direccion' del componente  -->
-        <input type="text" [(ngModel)]="direccion" placeholder="Ej: Gran Vía, Madrid"/>
+        <select [(ngModel)]="tipoServicio">
+          <option value="EstacionesTerrestres">Estaciones de servicio</option>
+          <option value="PostesMaritimos">Postes marítimos</option>
+        </select>
       </div>
 
-      <div class="num_gas">
-        <p>Número de gasolineras</p>
+      <div class="localizador">
+        <p>Buscar por</p>
 
-        <!-- Input con mínimo 1 -->
-        <input type="number" min="1" [(ngModel)]="numGas" />
+        <select [(ngModel)]="tipoBusqueda">
+          <option value="direccion">Dirección</option>
+          <option value="ubicacion">Ubicación del dispositivo</option>
+          <option value="provincia">Provincia</option>
+          <option value="comunidad">Comunidad autónoma</option>
+        </select>
       </div>
     </div>
 
-    <!-- Radio y tipo de carburante -->
     <div class="row">
+      <div class="num_gas">
+        <p>Número de resultados</p>
+        <input type="number" min="1" [(ngModel)]="numGas" />
+      </div>
+
+      <div class="fecha_box">
+        <label>
+          <input type="checkbox" [(ngModel)]="filtroFechaActivo" />
+          Filtrar por fecha
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaFiltro"
+          [disabled]="!filtroFechaActivo"
+        />
+      </div>
+    </div>
+
+    <div class="row" *ngIf="tipoBusqueda === 'direccion'">
+      <div class="localizador">
+        <p>Dirección</p>
+
+        <input
+          type="text"
+          [(ngModel)]="direccion"
+          placeholder="Ej: Gran Vía, Madrid"
+        />
+      </div>
+    </div>
+
+    <div class="row" *ngIf="tipoBusqueda === 'provincia'">
+      <div class="localizador">
+        <p>Provincia</p>
+
+        <select [(ngModel)]="provinciaSeleccionada">
+          <option value="">Selecciona una provincia</option>
+
+          <option
+            *ngFor="let p of provincias"
+            [value]="p.IDProvincia || p.IDPovincia"
+          >
+            {{ p.Provincia }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="tipoBusqueda === 'comunidad'">
+      <div class="localizador">
+        <p>Comunidad autónoma</p>
+
+        <select [(ngModel)]="comunidadSeleccionada">
+          <option value="">Selecciona una comunidad</option>
+
+          <option *ngFor="let c of comunidades" [value]="c.IDCCAA">
+            {{ c.CCAA }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div
+      class="row"
+      *ngIf="tipoBusqueda === 'direccion' || tipoBusqueda === 'ubicacion'"
+    >
       <div class="localizador">
         <p>Radio (km)</p>
 
-        <!-- Radio en km con máximo 100 y mínimo 1 -->
         <input type="number" min="1" max="100" [(ngModel)]="radioKm" />
       </div>
 
       <div class="localizador">
         <p>Carburante</p>
 
-        <!-- Desplegable de carburantes -->
         <select [(ngModel)]="IdCarburante">
-          <!-- *ngFor recorre la lista de carburantes y crea una opción para cada uno -->
           <option *ngFor="let f of carburantes" [value]="f.id">
             {{ f.label }}
           </option>
@@ -45,12 +110,23 @@
       </div>
     </div>
 
-    <!-- Filtro de empresas -->
-    <div class="row">
+    <div
+      class="row"
+      *ngIf="tipoBusqueda === 'provincia' || tipoBusqueda === 'comunidad'"
+    >
+      <div class="localizador">
+        <p>Carburante</p>
+
+        <select [(ngModel)]="IdCarburante">
+          <option *ngFor="let f of carburantes" [value]="f.id">
+            {{ f.label }}
+          </option>
+        </select>
+      </div>
+
       <div class="localizador">
         <p>Empresa</p>
 
-        <!-- Desplegable de empresas -->
         <select [(ngModel)]="empresaSeleccionada">
           <option *ngFor="let e of empresasTop" [value]="e">
             {{ e }}
@@ -58,54 +134,67 @@
         </select>
       </div>
     </div>
- 
-    <!-- Botón de búsqueda -->
-    <div class="button_search">
-      <!-- Al hacer click llama a la función -->
-      <button (click)="obtenerDireccionYBuscar()">Buscar</button>
+
+    <div
+      class="row"
+      *ngIf="tipoBusqueda === 'direccion' || tipoBusqueda === 'ubicacion'"
+    >
+      <div class="localizador">
+        <p>Empresa</p>
+
+        <select [(ngModel)]="empresaSeleccionada">
+          <option *ngFor="let e of empresasTop" [value]="e">
+            {{ e }}
+          </option>
+        </select>
+      </div>
     </div>
 
-    <!-- Mensajes de estado -->
+    <div class="button_search">
+      <button (click)="obtenerDireccionYBuscar()" [disabled]="loading">
+        {{ loading ? 'Buscando...' : 'Buscar' }}
+      </button>
+    </div>
+
     <p *ngIf="ubicacionTexto">{{ ubicacionTexto }}</p>
     <p *ngIf="loading">Buscando...</p>
     <p *ngIf="info && !error">{{ info }}</p>
 
-    <!-- Mensaje de error -->
     <p class="error_p" *ngIf="error">{{ error }}</p>
   </div>
 
-  <!-- Sección de resultados -->
   <div class="results_card">
-    <h2>Gasolineras localizadas</h2>
+    <h2>Resultados localizados</h2>
 
-    <!-- Si hay resultados, se muestra el precio -->
     <p *ngIf="results.length">
-      Precio mostrado: {{ fuelLabel }}
-    </p>
+  Precio mostrado: {{ fuelLabel }}
+  <span *ngIf="filtroFechaActivo && fechaFiltro">
+    · Resultados de la fecha {{ fechaFiltro | date:'dd/MM/yyyy' }}
+  </span>
+</p>
 
-    <!-- *ngFor recorre la lista de gasolineras -->
-    <div *ngFor="let g of results">
-      <!-- Marcar gasolinera más barata -->
-      <div *ngIf="g.barata" style="font-weight:700">¡Más barata!</div>
+    <div *ngFor="let g of results" class="result_item">
+      <div *ngIf="g.barata" class="barata">
+        ¡Más barato!
+      </div>
 
-      <!-- Datos de la gasolinera -->
-      <b>{{ g.empresa }}</b> · {{ g.distanciaKm | number:'1.1-1' }} km<br />
+      <b>{{ g.empresa }}</b>
 
-      <!-- Dirección -->
+      <span *ngIf="tipoBusqueda === 'direccion' || tipoBusqueda === 'ubicacion'">
+        · {{ g.distanciaKm | number:'1.1-1' }} km
+      </span>
+
+      <br />
+
       {{ g.direccion }}<br />
 
-      <!-- Localidad/provincia -->
       <small>{{ g.localidad }} · {{ g.provincia }}</small><br />
 
-      <!-- Horario -->
       <small>Horario: {{ g.horario }}</small><br />
 
-      <!-- Si el precio es nulo muestra N/D, sino muestra el precio -->
       <small>Precio: {{ g.precio ?? 'N/D' }} €/L</small>
 
-      <!-- Separador visual entre resultados -->
-      <hr /> 
+      <hr />
     </div>
   </div>
 </div>
-

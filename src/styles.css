@@ -9,7 +9,7 @@ body {
 }
 
 header {
-    background: linear-gradient(90deg, #0e0d0d, #e92525);
+    background: linear-gradient(90deg, #0e0d0d, #008ecb);
     display: flex;
     justify-content: center;
     align-items: center;          
@@ -39,5 +39,5 @@ footer{
 }
 
 .footer .p3 {
-    color: rgb(187, 18, 18)
+    color: rgb(130, 130, 130)
 }
